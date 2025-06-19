@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 AI 工具門戶</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+
+        .option.wrong {
+            border-color: #dc3545;
+            background: #dc3545;
+            color: white;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 120px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .gradio-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            font-size: 1.3rem;
+            padding: 20px 40px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    
+    <div class="container">
+        <div class="logo">🤖</div>
+        <h1>AI 工具門戶</h1>
+        
+        <div id="quiz-section">
+            <div class="question-box">
+                <div class="question" id="question-text"></div>
+                <div class="options" id="options-container"></div>
+                <button class="submit-btn" id="submit-btn" onclick="checkAnswer()" disabled>提交答案</button>
+                <button class="submit-btn" id="next-btn" onclick="nextQuestion()" style="display:none;">下一題</button>
+            </div>
+            <div id="error-message" class="error-message hidden"></div>
+        </div>
+
+        <div id="success-section" class="hidden">
+            <div class="success-message fade-in">
+                🎉 恭喜通過驗證！
+            </div>
+            <button class="submit-btn gradio-btn" onclick="openGradio()">
+                🚀 使用 AI 工具
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 在這裡設置你的 Gradio 連結
+        const GRADIO_URL = 'https://0d2fffb89acafb04bf.gradio.live';
+        
+        const questions = [
+            {
+                question: "哆啦A夢最喜愛的食物是？",
+                options: ["鯛魚燒", "銅鑼燒", "豬血糕", "老鼠"],
+                correct: 1
+            },
+            {
+                question: "一天有幾個小時？",
+                options: ["23小時", "24小時", "25小時", "26小時"],
+                correct: 1
+            },
+            {
+                question: "哪種方法不會引來野海熊？",
+                options: ["拿著手電筒亂搖亂閃", "反戴墨西哥帽", "像黑猩猩一樣鬼叫 ", "吃美味蟹堡"],
+                correct: 3
+            },
+            {
+                question: "誰不是研發一部成員？",
+                options: ["James", "Kevin", "Eric", "Max"],
+                correct: 2
+            },
+            {
+                question: "一年有幾個月？",
+                options: ["10個月", "11個月", "12個月", "13個月"],
+                correct: 2
+            },
+            {
+                question: "企鵝生活在哪裡？",
+                options: ["北極", "南極", "赤道", "沙漠"],
+                correct: 1
+            },
+            {
+                question: "在《不可能的任務1》中，經典的「天花板垂降」場景發生在什麼地方？",
+                options: ["CIA總部", "NYCU", "台北101", "新竹高鐵站"],
+                correct: 0
+            },
+            {
+                question: "一個星期有幾天？",
+                options: ["6天", "7天", "8天", "9天"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let selectedOption = -1;
+
+        function createStars() {
+            const stars = document.querySelector('.stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                stars.appendChild(star);
+            }
+        }
+
+        function loadQuestion() {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = randomIndex;
+            const q = questions[currentQuestion];
+            
+            document.getElementById('question-text').textContent = q.question;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            selectedOption = -1;
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('error-message').classList.add('hidden');
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function selectOption(index) {
+            // 清除之前的選擇
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // 選擇新選項
+            document.querySelectorAll('.option')[index].classList.add('selected');
+            selectedOption = index;
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (selectedOption === -1) return;
+            
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            if (selectedOption === q.correct) {
+                options[selectedOption].classList.add('correct');
+                setTimeout(() => {
+                    document.getElementById('quiz-section').classList.add('hidden');
+                    document.getElementById('success-section').classList.remove('hidden');
+                }, 1000);
+            } else {
+                options[selectedOption].classList.add('wrong');
+                options[q.correct].classList.add('correct');
+                document.getElementById('error-message').textContent = '答錯了！請再試一題 😊';
+                document.getElementById('error-message').classList.remove('hidden');
+                document.getElementById('next-btn').style.display = 'inline-block';
+                document.getElementById('submit-btn').style.display = 'none';
+            }
+        }
+
+        function nextQuestion() {
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            loadQuestion();
+        }
+
+        function openGradio() {
+            window.open(GRADIO_URL, '_blank');
+        }
+
+        // 初始化
+        createStars();
+        loadQuestion();
+    </script>
+</body>
+</html>
