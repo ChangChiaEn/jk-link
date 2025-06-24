@@ -184,9 +184,9 @@
             margin: 10px 0;
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden{ display:none !important; }
+
+
 
         .fade-in {
             animation: fadeIn 0.5s ease-in;
@@ -196,6 +196,24 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        
+        /* ====== 彈窗樣式 ====== */
+        #update-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55);
+          display:flex; justify-content:center; align-items:center; z-index:999; }
+        #update-modal{ background:#fff; border-radius:18px; padding:32px 28px;
+          max-width:420px; width:88%; text-align:center;
+          box-shadow:0 12px 32px rgba(0,0,0,.18); animation:fadeIn .35s ease-out; }
+        #update-modal h2{ font-size:1.5rem; margin-bottom:14px; color:#333; }
+        #update-modal p{ font-size:1.1rem; margin-bottom:22px; line-height:1.45; }
+        #update-modal button{ background:linear-gradient(45deg,#667eea,#764ba2);
+          color:#fff; border:none; border-radius:24px; padding:12px 28px;
+          font-size:1rem; cursor:pointer; transition:.25s all; }
+        #update-modal button:hover{ transform:translateY(-2px); }
+
+
+
+
     </style>
 </head>
 <body>
@@ -225,9 +243,41 @@
         </div>
     </div>
 
+    <!-- 更新彈窗 -->
+    <div id="update-modal-overlay" class="hidden" onclick="closeUpdateModal()">
+      <div id="update-modal" onclick="event.stopPropagation();"><!-- 防止冒泡 -->
+        <h2>✨ WeeklyReportGenerator 更新囉！</h2>
+    
+        <!-- 特色簡介 -->
+        <p style="margin-bottom:12px;">
+          我們新增了 <strong>AI 智能表格佈局助手</strong>，協助你用自然語言描述想要的排版，
+          系統會自動產生最佳的 <em>行列數、X/Y 標籤</em> 與 <em>不規則表格配置</em>！
+        </p>
+    
+        <!-- 功能亮點列表 -->
+        <ul style="text-align:left; margin:0 auto 22px; padding-left:20px; line-height:1.55; max-width:360px;">
+          <li>🧠 <strong>語意理解</strong>：讀懂中文指令，自動推斷表格大小</li>
+          <li>📝 <strong>智能命名</strong>：依實驗條件生成易讀的橫縱標籤</li>
+          <li>🔀 <strong>不規則格線</strong>：支援 1×5、3×2… 最高 10×10</li>
+          <li>⚡ <strong>一鍵套用</strong>：立即同步到上傳影像的格線佈局</li>
+        </ul>
+    
+        <!-- 使用提示 -->
+        <p style="font-size:0.95rem; color:#555; margin-bottom:26px;">
+          在「🛠️ 工具處理 &gt; ⚙️ 步驟2」中開啟
+          <em>AI 智能表格佈局助手</em>，輸入需求後按「🎯 AI 生成佈局」即可體驗！
+        </p>
+    
+        <button onclick="closeUpdateModal()">我知道了</button>
+      </div>
+    </div>
+
+
+
+    
     <script>
         // 在這裡設置你的 Gradio 連結
-        const GRADIO_URL = 'https://904061ec9e4c791e30.gradio.live';
+        const GRADIO_URL = 'https://c8a7e099e6526114b8.gradio.live';
         
         const questions = [
             {
@@ -354,9 +404,27 @@
             window.open(GRADIO_URL, '_blank');
         }
 
+
+        /* ====== 更新提示彈窗 ====== */
+        /* 顯示彈窗 ── 拿掉 hidden */
+        function showUpdateModal () {
+          document
+            .getElementById('update-modal-overlay')
+            .classList.remove('hidden');
+        }
+      
+        /* 關閉彈窗 ── 加回 hidden */
+        function closeUpdateModal () {
+          document
+            .getElementById('update-modal-overlay')
+            .classList.add('hidden');
+        }
+        
         // 初始化
         createStars();
         loadQuestion();
+        showUpdateModal();    
+
     </script>
 </body>
 </html>
