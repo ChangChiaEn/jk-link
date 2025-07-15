@@ -16,9 +16,10 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .stars {
@@ -184,9 +185,7 @@
             margin: 10px 0;
         }
 
-        .hidden{ display:none !important; }
-
-
+        .hidden { display: none !important; }
 
         .fade-in {
             animation: fadeIn 0.5s ease-in;
@@ -196,31 +195,50 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        
-        /* ====== 彈窗樣式 ====== */
-        #update-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55);
-          display:flex; justify-content:center; align-items:center; z-index:999; }
-        #update-modal{ background:#fff; border-radius:18px; padding:32px 28px;
-          max-width:420px; width:88%; text-align:center;
-          box-shadow:0 12px 32px rgba(0,0,0,.18); animation:fadeIn .35s ease-out; }
-        #update-modal h2{ font-size:1.5rem; margin-bottom:14px; color:#333; }
-        #update-modal p{ font-size:1.1rem; margin-bottom:22px; line-height:1.45; }
-        #update-modal button{ background:linear-gradient(45deg,#667eea,#764ba2);
-          color:#fff; border:none; border-radius:24px; padding:12px 28px;
-          font-size:1rem; cursor:pointer; transition:.25s all; }
-        #update-modal button:hover{ transform:translateY(-2px); }
 
+        /* 隱藏答案按鈕 */
+        .answer-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
 
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.1);
+        }
 
-
+        .answer-display {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            max-width: 200px;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-in;
+        }
     </style>
 </head>
 <body>
     <div class="stars"></div>
     
     <div class="container">
-        <div class="logo">🤖</div>
+        <div class="logo">🗿</div>
         <h1>AI 工具門戶</h1>
         
         <div id="quiz-section">
@@ -243,38 +261,10 @@
         </div>
     </div>
 
-    <!-- 更新彈窗 -->
-    <div id="update-modal-overlay" class="hidden" onclick="closeUpdateModal()">
-      <div id="update-modal" onclick="event.stopPropagation();"><!-- 防止冒泡 -->
-        <h2>✨ WeeklyReportGenerator 更新囉！</h2>
-    
-        <!-- 特色簡介 -->
-        <p style="margin-bottom:12px;">
-          我們新增了 <strong>AI 智能表格佈局助手</strong>，協助你用自然語言描述想要的排版，
-          系統會自動產生最佳的 <em>行列數、X/Y 標籤</em> 與 <em>不規則表格配置</em>！
-        </p>
-    
-        <!-- 功能亮點列表 -->
-        <ul style="text-align:left; margin:0 auto 22px; padding-left:20px; line-height:1.55; max-width:360px;">
-          <li>🧠 <strong>語意理解</strong>：讀懂中文指令，自動推斷表格大小</li>
-          <li>📝 <strong>智能命名</strong>：依實驗條件生成易讀的橫縱標籤</li>
-          <li>🔀 <strong>不規則格線</strong>：支援 1×5、3×2… 最高 10×10</li>
-          <li>⚡ <strong>一鍵套用</strong>：立即同步到上傳影像的格線佈局</li>
-        </ul>
-    
-        <!-- 使用提示 -->
-        <p style="font-size:0.95rem; color:#555; margin-bottom:26px;">
-          在「🛠️ 工具處理 &gt; ⚙️ 步驟2」中開啟
-          <em>AI 智能表格佈局助手</em>，輸入需求後按「🎯 AI 生成佈局」即可體驗！
-        </p>
-    
-        <button onclick="closeUpdateModal()">我知道了</button>
-      </div>
-    </div>
+    <!-- 隱藏答案按鈕 -->
+    <button class="answer-btn" id="answer-btn" onclick="showAnswer()">?</button>
+    <div id="answer-display" class="answer-display hidden"></div>
 
-
-
-    
     <script>
         // 在這裡設置你的 Gradio 連結
         const GRADIO_URL = 'https://c5ed9cd524fb591b5f.gradio.live';
@@ -324,47 +314,47 @@
                 question: "遊戲王中「OZ之主」是用哪兩張卡融合的？",
                 options: ["巨大樹熊 + 死亡袋鼠", "青眼白龍 + 黑魔導", "龍騎士 + 骷髏戰士", "沉默劍士 + 羽翼栗子球"],
                 correct: 0
-              },
+            },
             {
                 question: "千年積木中封印的其實是？",
                 options: ["神秘老人", "法老王亞圖姆", "遊戲設計師", "黑魔導"],
                 correct: 1
-              },
+            },
             {
                 question: "下列何者不是海綿寶寶中國際超級好朋友正義公理協會的成員？",
                 options: ["超強彈力橡皮人", "岩漿教授", "黃鐵老先知", "骯髒泡泡"],
                 correct: 3
-              },
+            },
             {
                 question: "海綿寶寶中「空手道聖島」的島主是誰？",
                 options: ["章魚哥", "烏龍大師", "蟹老闆", "皮老闆"],
                 correct: 1
-              },
+            },
             {
                 question: "下列何者不是海綿寶寶摔碎屁屁的時候陪伴他的好朋友？",
                 options: ["一塊", "薯片", "派大星", "垃圾紙巾"],
                 correct: 2
-              },
+            },
             {
                 question: "烏龍派出所「迷路小象的假日」該集中阿兩撿到的小象名為？ (Question from kck)",
                 options: ["中川圭一", "東東", "秋本麗子", "寺井洋一"],
                 correct: 1
-              },
+            },
             {
                 question: "烏龍派出所中大原所長最喜歡的錦鯉叫什麼名字？ (Question from kck)",
                 options: ["鯉大郎", "鯉二郎", "鯉三郎", "鯉四郎"],
                 correct: 1
-              },
+            },
             {
                 question: "烏龍派出所「從天而降的新進警官」該集出場警官是誰? 撞壞的模型直升機多少錢日幣？ (Question from kck)",
                 options: ["日暮熟睡男 10萬", "小野小町 20萬", "中川圭一 30萬", "白鳥麗次 40萬"],
                 correct: 2
-              },
+            },
             {
                 question: "海賊王當中海賊獵人羅羅亞 索隆咬在最裡的刀「和道一文字」屬於何種階級的刀？ (Question from kck)",
                 options: ["無上大快刀", "精良大快刀", "大快刀", "快刀"],
                 correct: 2
-              },
+            },
             {
                 question: "名偵探柯南中俗稱酒廠的黑暗組織，以下何人已陣亡？ (Question from kck)",
                 options: ["基安蒂", "波本", "黑麥威士忌", "蘇格蘭威士忌"],
@@ -375,7 +365,6 @@
                 options: ["V字型迴轉", "闖紅燈左轉", "下車", "右轉"],
                 correct: 0
             }
-              
         ];
 
         let currentQuestion = 0;
@@ -415,6 +404,9 @@
             document.getElementById('submit-btn').disabled = true;
             document.getElementById('error-message').classList.add('hidden');
             document.getElementById('next-btn').style.display = 'none';
+            
+            // 隱藏答案顯示
+            document.getElementById('answer-display').classList.add('hidden');
         }
 
         function selectOption(index) {
@@ -440,6 +432,7 @@
                 setTimeout(() => {
                     document.getElementById('quiz-section').classList.add('hidden');
                     document.getElementById('success-section').classList.remove('hidden');
+                    document.getElementById('answer-btn').style.display = 'none';
                 }, 1000);
             } else {
                 options[selectedOption].classList.add('wrong');
@@ -460,27 +453,24 @@
             window.open(GRADIO_URL, '_blank');
         }
 
+        // 顯示答案功能
+        function showAnswer() {
+            const q = questions[currentQuestion];
+            const correctAnswer = q.options[q.correct];
+            const answerDisplay = document.getElementById('answer-display');
+            
+            answerDisplay.textContent = `正確答案：${correctAnswer}`;
+            answerDisplay.classList.remove('hidden');
+            
+            // 3秒後自動隱藏
+            setTimeout(() => {
+                answerDisplay.classList.add('hidden');
+            }, 3000);
+        }
 
-        /* ====== 更新提示彈窗 ====== */
-        /* 顯示彈窗 ── 拿掉 hidden */
-        function showUpdateModal () {
-          document
-            .getElementById('update-modal-overlay')
-            .classList.remove('hidden');
-        }
-      
-        /* 關閉彈窗 ── 加回 hidden */
-        function closeUpdateModal () {
-          document
-            .getElementById('update-modal-overlay')
-            .classList.add('hidden');
-        }
-        
         // 初始化
         createStars();
         loadQuestion();
-        showUpdateModal();    
-
     </script>
 </body>
 </html>
